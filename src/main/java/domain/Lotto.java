@@ -1,33 +1,41 @@
 package domain;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Lotto
 {
-    // 랜덤한 로또 숫자 6개 생성
-    private static List<Integer> generateLottoNumbers()
+    private final List<Integer> lottoNumber;
+
+    public Lotto(List<Integer> numbers)
     {
-        List<Integer> numbers = new ArrayList<>();
-        for (int i=1; i<46; i++)
-            numbers.add(i);
+        if (numbers.size() != LottoConstants.LOTTO_COUNT)
+            throw new IllegalArgumentException(String.format("로또 번호는 %d개여야 합니다.", LottoConstants.LOTTO_COUNT));
 
-        Collections.shuffle(numbers);
+        if (checkDuplicate(numbers))
+            throw new IllegalArgumentException("로또 번호에 중복이 없어야 합니다.");
 
-        return numbers.subList(0, 6).stream()
-                .sorted()
-                .collect(Collectors.toList());
+        this.lottoNumber = numbers;
     }
 
-    // 로또 여러 장 생성
-    public static List<List<Integer>> generateLottos(int count)
+    // 중복 숫자 체크
+    private boolean checkDuplicate(List<Integer> numList)
     {
-        List<List<Integer>> result = new ArrayList<>();
-        for (int i=0; i<count; i++)
-            result.add(generateLottoNumbers());
+        Set<Integer> numSet = new HashSet<>(numList);
+        return numSet.size() != numList.size();
+    }
 
-        return result;
+    // 현재 로또와 다른 로또의 공통 숫자 개수 반환
+    public int getCorrectCount(Lotto otherLotto)
+    {
+        return (int) lottoNumber.stream()
+                .filter(otherLotto.getLotto()::contains)
+                .count();
+    }
+
+    // 저장된 로또 숫자 반환
+    public List<Integer> getLotto()
+    {
+        return lottoNumber;
     }
 }
