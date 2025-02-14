@@ -7,11 +7,17 @@ import java.util.stream.Collectors;
 public class Lottos
 {
     private final List<Lotto> lottos = new ArrayList<>();
-    private final int buyCount;
+    private int buyCount = 0;
 
     public Lottos(int count)
     {
         this.buyCount = count;
+    }
+
+    public void addManualLottos(List<List<Integer>> manualLottos)
+    {
+        for (List<Integer> manualLotto : manualLottos)
+            lottos.add((Lotto) manualLotto);
     }
 
     // 랜덤한 로또 숫자 + 보너스 번호 생성
@@ -29,9 +35,9 @@ public class Lottos
     }
 
     // 로또 여러 장 생성
-    public void generateLottos()
+    public void generateLottos(int additionalCount)
     {
-        for (int i=0; i<buyCount; i++)
+        for (int i=0; i<additionalCount; i++)
             lottos.add(new Lotto(generateLottoNumbers()));
     }
 

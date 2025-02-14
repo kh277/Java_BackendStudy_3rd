@@ -2,6 +2,8 @@ package view;
 
 import domain.LottoConstants;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -11,17 +13,51 @@ public class InputView
 {
     private static final Scanner sc = new Scanner(System.in);
 
-    // 구입할 로또의 금액 입력처리
-    public static int getLottoCount()
+    // 총 구입 금액 입력처리
+    public static int getTotalCost()
     {
         System.out.println("구입금액을 입력해 주세요.");
-        int buyCount = Integer.parseInt(sc.nextLine());
+        int buyCost = Integer.parseInt(sc.nextLine());
 
-        if (buyCount < 0)
+        if (buyCost < 0)
             throw new IllegalArgumentException("구입금액은 양수여야 합니다.");
 
-        System.out.println("\n" + buyCount/LottoConstants.LOTTO_PRICE + "개를 구매했습니다.");
-        return buyCount/LottoConstants.LOTTO_PRICE;
+        return buyCost / LottoConstants.LOTTO_PRICE;
+    }
+
+    // 수동 구입 로또 수 입력처리
+    public static int getManualBuyCount(int totalBuyCount)
+    {
+        System.out.println("수동으로 구매할 로또 수를 입력해 주세요.");
+        int manualBuyCount = Integer.parseInt(sc.nextLine());
+
+        if (manualBuyCount < 0)
+            throw new IllegalArgumentException("구입금액은 양수여야 합니다.");
+
+        if (totalBuyCount < manualBuyCount)
+            throw new IllegalArgumentException("지불한 금액보다 더 많은 로또를 구매할 수 없습니다.");
+
+        return manualBuyCount;
+    }
+
+    // 수동 구입 로또 번호 입력처리
+    public static List<List<Integer>> getManualLottoNumber(int manualBuyCount)
+    {
+        System.out.println("수동으로 구매할 번호를 입력해 주세요.");
+        String lastString = sc.nextLine();
+        List<List<Integer>> manualLottos = new ArrayList<>();
+
+        for (int i=0; i<manualBuyCount; i++)
+        {
+            manualLottos.add(
+                    Pattern.compile(",\\s*")
+                    .splitAsStream(lastString)
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList()));
+        }
+
+        System.out.println("\n수동으로 " + manualBuyCount/LottoConstants.LOTTO_PRICE + "개를 구매했습니다.");
+        return manualLottos;
     }
 
     // 지난주 당첨 번호를 입력처리 및 List<Integer>로 반환

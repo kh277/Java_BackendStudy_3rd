@@ -8,12 +8,26 @@ public class Application
 {
     public static void main (String[] args)
     {
-        // 살 로또 개수 입력
-        int buyCount = InputView.getLottoCount();
+        // 구입 금액 입력
+        int totalBuyCount = InputView.getTotalCost();
+        final Lottos tickets = new Lottos(totalBuyCount);
+//
 
-        // buyCount만큼 로또 번호 생성
-        final Lottos tickets = new Lottos(buyCount);
-        tickets.generateLottos();
+        // 수동 로또 입력 처리 및 생성
+        int manualBuyCount = InputView.getManualBuyCount(totalBuyCount);
+        tickets.addManualLottos(InputView.getManualLottoNumber(manualBuyCount));
+
+
+        ////// 여기까지만 처리했음 -----------
+
+
+
+        // 자동 로또 구입 및 번호 생성
+        tickets.generateLottos(totalBuyCount-manualBuyCount);
+
+
+
+
 
         // 가지고 있는 로또 출력
         ResultView.printLottos(tickets.getLottos());
