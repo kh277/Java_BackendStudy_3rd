@@ -1,7 +1,6 @@
 package domain;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Lotto
 {
@@ -9,8 +8,8 @@ public class Lotto
 
     public Lotto(List<Integer> numbers)
     {
-        if (numbers.size() != LottoConstants.LOTTO_COUNT)
-            throw new IllegalArgumentException(String.format("로또 번호는 %d개여야 합니다.", LottoConstants.LOTTO_COUNT));
+        if (numbers.size() != LottoConstants.LOTTO_COUNT+ LottoConstants.BONUS_LOTTO_COUNT)
+            throw new IllegalArgumentException(String.format("로또 번호는 %d개여야 합니다.", LottoConstants.LOTTO_COUNT + LottoConstants.BONUS_LOTTO_COUNT));
 
         if (checkDuplicate(numbers))
             throw new IllegalArgumentException("로또 번호에 중복이 없어야 합니다.");
@@ -25,16 +24,23 @@ public class Lotto
         return numSet.size() != numList.size();
     }
 
-    // 현재 로또와 다른 로또의 공통 숫자 개수 반환
-    public int getCorrectCount(Lotto otherLotto)
+    // 현재 로또와 당첨 로또의 공통 숫자 개수 반환
+    public int getCorrectCount(Lotto goalLotto)
     {
         return (int) lottoNumber.stream()
-                .filter(otherLotto.getLotto()::contains)
+                .filter(goalLotto.getLottoNumbers()::contains)
                 .count();
     }
 
+    // 현재 로또와 당첨 로또의 2등 보너스번호 비교
+    public boolean getIsBonus(int bonusNumber)
+    {
+        return lottoNumber.stream()
+                .anyMatch(num -> num == bonusNumber);
+    }
+
     // 저장된 로또 숫자 반환
-    public List<Integer> getLotto()
+    public List<Integer> getLottoNumbers()
     {
         return lottoNumber;
     }

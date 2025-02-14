@@ -1,5 +1,7 @@
 package view;
 
+import domain.LottoConstants;
+
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -18,8 +20,8 @@ public class InputView
         if (buyCount < 0)
             throw new IllegalArgumentException("구입금액은 양수여야 합니다.");
 
-        System.out.println("\n" + buyCount/1000 + "개를 구매했습니다.");
-        return buyCount/1000;
+        System.out.println("\n" + buyCount/LottoConstants.LOTTO_PRICE + "개를 구매했습니다.");
+        return buyCount/LottoConstants.LOTTO_PRICE;
     }
 
     // 지난주 당첨 번호를 입력처리 및 List<Integer>로 반환
@@ -37,5 +39,16 @@ public class InputView
              throw new IllegalArgumentException("입력된 지난주의 당첨 번호가 6개가 아닙니다.");
 
          return goalNumber;
+    }
+
+    public static int getLastweekBonusGoalNumber()
+    {
+        System.out.println("\n보너스 볼을 입력해 주세요.");
+        int bonusNumber = Integer.parseInt(sc.nextLine());
+
+        if (bonusNumber < 1 || bonusNumber > 45)
+            throw new IllegalArgumentException("보너스 볼은 1~45 사이의 값이어야 합니다.");
+
+        return bonusNumber;
     }
 }

@@ -18,8 +18,12 @@ public class Application
         // 가지고 있는 로또 출력
         ResultView.printLottos(tickets.getLottos());
 
-        // 지난주 로또 번호를 입력받아 당첨 통계내기
-        List<Integer> lastWeekGoalNumber = InputView.getLastweekGoalNumber();
-        ResultView.calculateProceed(lastWeekGoalNumber, tickets);
+        // 지난주 로또 번호를 입력받기
+        List<Integer> lastweekGoalNumber = InputView.getLastweekGoalNumber();
+        int lastweekBonusGoalNumber = InputView.getLastweekBonusGoalNumber();
+
+        // 결과 출력
+        ResultView.calculateProceed(lastweekGoalNumber, lastweekBonusGoalNumber, tickets);
+
     }
 }

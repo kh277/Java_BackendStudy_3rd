@@ -1,22 +1,20 @@
 package domain;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Lottos
 {
     private final List<Lotto> lottos = new ArrayList<>();
-    private int buyCount = 0;
+    private final int buyCount;
 
     public Lottos(int count)
     {
         this.buyCount = count;
     }
 
-    // 랜덤한 로또 숫자 6개 생성
+    // 랜덤한 로또 숫자 + 보너스 번호 생성
     private List<Integer> generateLottoNumbers()
     {
         List<Integer> numbers = new ArrayList<>();
@@ -25,7 +23,7 @@ public class Lottos
 
         Collections.shuffle(numbers);
 
-        return numbers.subList(0, LottoConstants.LOTTO_COUNT).stream()
+        return numbers.subList(0, LottoConstants.LOTTO_COUNT+LottoConstants.BONUS_LOTTO_COUNT).stream()
                 .sorted()
                 .collect(Collectors.toList());
     }
@@ -38,18 +36,23 @@ public class Lottos
     }
 
     // 모든 로또 티켓에 대해 일치하는 개수 세기
-    public List<Integer> getTotalCorrectCount(List<Integer> lastweekGoalNumber)
+    public Map<Rank, Long> getTotalCorrectCount(List<Integer> lastweekGoalNumber, int lastweekBonusGoalNumber)
     {
-        List<Integer> correctCount = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0));
-        Lotto lastweekLotto = new Lotto(lastweekGoalNumber);
+        Map<Rank, Long> result = lottos.stream()
+                .map(lotto -> {
+                    int correctCount = (int) lotto.getLottoNumbers().stream()
+                            .filter(lastweekGoalNumber::contains)
+                            .count();
+                    boolean isBonus = lotto.getLottoNumbers()
+                            .contains(lastweekBonusGoalNumber);
+                    return Rank.calculateMatchCount(correctCount, isBonus);
+                })
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        for (int i=0; i<buyCount; i++)
-        {
-            int temp = lastweekLotto.getCorrectCount(lottos.get(i));
-            correctCount.set(temp, correctCount.get(temp) + 1);
-        }
+        for (Rank rank: Rank.values())
+            result.putIfAbsent(rank, 0L);
 
-        return correctCount.subList(3, LottoConstants.LOTTO_COUNT+1);
+        return result;
     }
 
     public List<Lotto> getLottos()
