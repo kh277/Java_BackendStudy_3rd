@@ -7,56 +7,73 @@ import java.util.stream.Collectors;
 public class Lottos
 {
     private final List<Lotto> lottos = new ArrayList<>();
-    private int buyCount = 0;
+    private int canBuyCount = 0;
+    private int manualBuyCount = 0;
+    private int autoBuyCount = 0;
 
-    public Lottos(int count)
+    public void payCost(int cost)
     {
-        this.buyCount = count;
+        this.canBuyCount += cost / LottoConstants.LOTTO_PRICE;
     }
 
-    public void addManualLottos(List<List<Integer>> manualLottos)
+    // 수동 로또 저장 처리
+    public void buyManualLottos(int manualBuyCount, List<List<Integer>> manualLottos)
     {
+        if (manualBuyCount > this.canBuyCount)
+            throw new IllegalArgumentException("지불한 금액보다 더 많은 로또는 살 수 없습니다.");
+
+        this.manualBuyCount += manualBuyCount;
+        this.autoBuyCount = this.canBuyCount - manualBuyCount;
+        this.canBuyCount = 0;
+
         for (List<Integer> manualLotto : manualLottos)
-            lottos.add((Lotto) manualLotto);
+            lottos.add(new Lotto(manualLotto));
     }
 
-    // 랜덤한 로또 숫자 + 보너스 번호 생성
-    private List<Integer> generateLottoNumbers()
+    private List<Integer> generateRandomNumbers()
     {
         List<Integer> numbers = new ArrayList<>();
         for (int i=1; i<=LottoConstants.MAX_LOTTO_NUMBER; i++)
             numbers.add(i);
 
         Collections.shuffle(numbers);
+        return numbers;
+    }
 
-        return numbers.subList(0, LottoConstants.LOTTO_COUNT+LottoConstants.BONUS_LOTTO_COUNT).stream()
+    private List<Integer> generateLottoNumbers()
+    {
+        return generateRandomNumbers().subList(0, LottoConstants.LOTTO_COUNT).stream()
                 .sorted()
                 .collect(Collectors.toList());
     }
 
-    // 로또 여러 장 생성
-    public void generateLottos(int additionalCount)
+    // 자동 로또 생성 및 저장 처리
+    public void buyAutoLottos()
     {
-        for (int i=0; i<additionalCount; i++)
+        for (int i=0; i<autoBuyCount; i++)
             lottos.add(new Lotto(generateLottoNumbers()));
     }
 
-    // 모든 로또 티켓에 대해 일치하는 개수 세기
-    public Map<Rank, Long> getTotalCorrectCount(List<Integer> lastweekGoalNumber, int lastweekBonusGoalNumber)
-    {
-        Map<Rank, Long> result = lottos.stream()
-                .map(lotto -> {
-                    int correctCount = (int) lotto.getLottoNumbers().stream()
-                            .filter(lastweekGoalNumber::contains)
-                            .count();
-                    boolean isBonus = lotto.getLottoNumbers()
-                            .contains(lastweekBonusGoalNumber);
-                    return Rank.calculateMatchCount(correctCount, isBonus);
-                })
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+    private Rank getCorrectCount(Lotto lotto, List<Integer> lastweekGoalNumber, int lastweekBonusGoalNumber) {
+        int correctCount = (int) lotto.getLottoNumbers().stream()
+                .filter(lastweekGoalNumber::contains)
+                .count();
+        boolean isBonus = lotto.getLottoNumbers().contains(lastweekBonusGoalNumber);
 
-        for (Rank rank: Rank.values())
-            result.putIfAbsent(rank, 0L);
+        return Rank.calculateMatchCount(correctCount, isBonus);
+    }
+
+    // 인자로 받은 모든 로또에 대해 일치하는 개수 체크
+    public Map<Rank, Long> getTotalCorrectCount(List<Integer> lastweekGoalNumber, int lastweekBonusGoalNumber) {
+        Map<Rank, Long> result = new EnumMap<>(Rank.class);
+
+        for (Rank rank : Rank.values())
+            result.put(rank, 0L);
+
+        for (Lotto lotto : lottos) {
+            Rank rank = getCorrectCount(lotto, lastweekGoalNumber, lastweekBonusGoalNumber);
+            result.put(rank, result.get(rank) + 1);
+        }
 
         return result;
     }
@@ -66,8 +83,13 @@ public class Lottos
         return lottos;
     }
 
+    public List<Integer> getLottoCount()
+    {
+        return Arrays.asList(manualBuyCount, autoBuyCount);
+    }
+
     public int getCost()
     {
-        return buyCount*1000;
+        return (manualBuyCount+autoBuyCount)*LottoConstants.LOTTO_PRICE;
     }
 }

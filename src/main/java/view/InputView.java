@@ -22,20 +22,17 @@ public class InputView
         if (buyCost < 0)
             throw new IllegalArgumentException("구입금액은 양수여야 합니다.");
 
-        return buyCost / LottoConstants.LOTTO_PRICE;
+        return buyCost;
     }
 
     // 수동 구입 로또 수 입력처리
-    public static int getManualBuyCount(int totalBuyCount)
+    public static int getManualBuyCount()
     {
-        System.out.println("수동으로 구매할 로또 수를 입력해 주세요.");
+        System.out.println("\n수동으로 구매할 로또 수를 입력해 주세요.");
         int manualBuyCount = Integer.parseInt(sc.nextLine());
 
         if (manualBuyCount < 0)
             throw new IllegalArgumentException("구입금액은 양수여야 합니다.");
-
-        if (totalBuyCount < manualBuyCount)
-            throw new IllegalArgumentException("지불한 금액보다 더 많은 로또를 구매할 수 없습니다.");
 
         return manualBuyCount;
     }
@@ -43,20 +40,18 @@ public class InputView
     // 수동 구입 로또 번호 입력처리
     public static List<List<Integer>> getManualLottoNumber(int manualBuyCount)
     {
-        System.out.println("수동으로 구매할 번호를 입력해 주세요.");
-        String lastString = sc.nextLine();
+        System.out.println("\n수동으로 구매할 번호를 입력해 주세요.");
         List<List<Integer>> manualLottos = new ArrayList<>();
 
         for (int i=0; i<manualBuyCount; i++)
         {
+            String lastString = sc.nextLine();
             manualLottos.add(
                     Pattern.compile(",\\s*")
                     .splitAsStream(lastString)
                     .map(Integer::parseInt)
                     .collect(Collectors.toList()));
         }
-
-        System.out.println("\n수동으로 " + manualBuyCount/LottoConstants.LOTTO_PRICE + "개를 구매했습니다.");
         return manualLottos;
     }
 

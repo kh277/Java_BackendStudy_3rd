@@ -8,8 +8,8 @@ public class Lotto
 
     public Lotto(List<Integer> numbers)
     {
-        if (numbers.size() != LottoConstants.LOTTO_COUNT+ LottoConstants.BONUS_LOTTO_COUNT)
-            throw new IllegalArgumentException(String.format("로또 번호는 %d개여야 합니다.", LottoConstants.LOTTO_COUNT + LottoConstants.BONUS_LOTTO_COUNT));
+        if (numbers.size() != LottoConstants.LOTTO_COUNT)
+            throw new IllegalArgumentException(String.format("로또 번호는 %d개여야 합니다.", LottoConstants.LOTTO_COUNT));
 
         if (checkDuplicate(numbers))
             throw new IllegalArgumentException("로또 번호에 중복이 없어야 합니다.");
